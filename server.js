@@ -27,12 +27,12 @@ function saveData(obj) {
   } catch (e) { console.error('save data error', e); }
 }
 
-// placeholder: call Chatbase (ganti endpoint/body sesuai dokumentasi akunmu)
+// placeholder: call Chatbase (replace endpoint/body if needed)
 async function callChatbase(text, wa) {
   if (!CHATBASE_KEY) return { text: `Mock reply: ${text}` };
   try {
     const resp = await axios.post(
-      'https://api.chatbase.co/v1/message', // sesuaikan kalau berbeda
+      'https://api.chatbase.co/v1/message',
       { messages: [{ role: 'user', content: text }], user: wa },
       { headers: { Authorization: `Bearer ${CHATBASE_KEY}` }, timeout: 8000 }
     );
@@ -43,7 +43,7 @@ async function callChatbase(text, wa) {
   }
 }
 
-// placeholder: kirim balasan ke WA provider (implementasikan sesuai provider kamu)
+// placeholder: send reply to WA provider (implement using your provider)
 async function sendToWhatsApp(to, reply) {
   // contoh: axios.post(providerUrl, { to, text: reply.text }, { headers: {...} })
   console.log('SEND_TO_WA', to, reply);
@@ -51,7 +51,6 @@ async function sendToWhatsApp(to, reply) {
 
 app.post('/webhook', async (req, res) => {
   try {
-    // terima beberapa format body yang umum
     const wa = (req.body && (req.body.from || req.body.sender || req.body.wa)) || req.query?.sender;
     const message = (req.body && (req.body.message || req.body.text || req.body.body)) || req.query?.message || '';
 
@@ -65,7 +64,7 @@ app.post('/webhook', async (req, res) => {
 
     if (data[wa] >= LIMIT) {
       console.log(`User ${wa} sudah mencapai limit (${data[wa]}). Returning 204.`);
-      return res.sendStatus(204); // silent
+      return res.sendStatus(204);
     }
 
     data[wa] += 1;
@@ -77,7 +76,6 @@ app.post('/webhook', async (req, res) => {
     return res.sendStatus(200);
   } catch (err) {
     console.error('Webhook handler error', err);
-    // fallback: jangan crash server — kembalikan 200 + pesan error (atau 204 sesuai kebijakan)
     return res.status(200).json({ reply: { text: 'Server error, coba lagi nanti.' } });
   }
 });
